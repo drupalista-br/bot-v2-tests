@@ -18,13 +18,13 @@ $get_cookies = function() use ($wo_id) {
     if ($failed)
         throw new \Exception('get_cookies failed');
 };
-$close = fn() => Browser::close($wo_id);
+$close = fn() => Browser::closeWindows($wo_id);
 $has_window_open = fn() : bool => Test::notPublic(Browser::class, 'hasWindowOpen', [$wo_id]);
 $is_launched = fn(string $class_worker) : bool => Test::notPublic(Browser::class, 'isLaunched', [$wo_id, $class_worker]);
 $browser = function(string $class_worker) use ($wo_id, $launch, $is_launched) {
     $browser_not_launched = !$is_launched($class_worker);
     $launch_browser = function() use ($class_worker, $launch, $wo_id) {
-        Browser::close($wo_id);
+        Browser::closeWindows($wo_id);
         $launch($class_worker);
     };
     if ($browser_not_launched)
@@ -33,6 +33,7 @@ $browser = function(string $class_worker) use ($wo_id, $launch, $is_launched) {
 require_once "{$folderpath_root}/core/dispatchers/cdp/vendor/autoload.php";
 require_once "{$folderpath_root}/CDPs/rfb/vendor/autoload.php";
 //Test::execute(get_defined_vars());
-$close();
+//$close();
 //$browser(Certificado::class);
 //$launch(Certificado::class);
+
