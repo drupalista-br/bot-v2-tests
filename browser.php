@@ -1,39 +1,29 @@
 <?php
-use Bót\Cdp\Rfb\eCac\Certificado;
-use Bót\Dispatcher\Browser;
-use Bót\Dispatcher\Method;
-use Bót\Utils\Gui\Server;
-use Bót\Utils\Package;
 use Bót\Utils\Test;
-$folderpath_root = dirname(__DIR__) . '/bót-v2';
-$wo_id = 'wo_id';
-$clear_tmp = function() {
-    Server::stop(Package::idByClass(Browser::class));
-    Test::clearTmp();
-};
-$launch = fn(string $class_worker) => Test::notPublic(Browser::class, 'launch', [$wo_id, $class_worker]);
-$get_cookies = function() use ($wo_id) {
-    $cookies = Method::getCookies($wo_id);
-    $failed = !(isset($cookies[0]['name']) && isset($cookies[0]['value']));
-    if ($failed)
-        throw new \Exception('get_cookies failed');
-};
-$close = fn() => Browser::closeWindows($wo_id);
-$has_window_open = fn() : bool => Test::notPublic(Browser::class, 'hasWindowOpen', [$wo_id]);
-$is_launched = fn(string $class_worker) : bool => Test::notPublic(Browser::class, 'isLaunched', [$wo_id, $class_worker]);
-$browser = function(string $class_worker) use ($wo_id, $launch, $is_launched) {
-    $browser_not_launched = !$is_launched($class_worker);
-    $launch_browser = function() use ($class_worker, $launch, $wo_id) {
-        Browser::closeWindows($wo_id);
-        $launch($class_worker);
-    };
-    if ($browser_not_launched)
-        $launch_browser();
-};
-require_once "{$folderpath_root}/core/dispatchers/cdp/vendor/autoload.php";
-require_once "{$folderpath_root}/CDPs/rfb/vendor/autoload.php";
+$_GET['folderpath-root'] = dirname(__DIR__) . '/bót-v2';
+class BrowserTest {
+    static function clearTmp(string $wo_id) {
+        require_once "{$_GET['folderpath-root']}/core/dispatchers/cdp/vendor/autoload.php";
+        \Bót\Utils\Gui\Server::stop(\Bót\Utils\Package::idByClass(\Bót\Dispatcher\Browser::class));
+        \Bót\Dispatcher\Browser::close($wo_id);
+        Test::clearTmp();
+    }
+    static function notLaunched(string $wo_id, string $class_worker) : bool {
+        require_once "{$_GET['folderpath-root']}/core/dispatchers/cdp/vendor/autoload.php";
+        return Test::notPublic(\Bót\Dispatcher\Browser::class, 'notLaunched', [$wo_id, $class_worker]);
+    }
+    static function close(string $wo_id) {
+        require_once "{$_GET['folderpath-root']}/core/dispatchers/cdp/vendor/autoload.php";
+        \Bót\Dispatcher\Browser::close($wo_id);
+    }
+    static function launch(string $wo_id, string $class_worker) {
+        require_once "{$_GET['folderpath-root']}/core/ui/wo/vendor/autoload.php";
+        require_once "{$_GET['folderpath-root']}/core/dispatchers/cdp/vendor/autoload.php";
+        require_once "{$_GET['folderpath-root']}/CDPs/rfb/vendor/autoload.php";
+        Test::notPublic(\Bót\Dispatcher\Browser::class, 'launch', [$wo_id, $class_worker]);
+    }
+}
 //Test::execute(get_defined_vars());
-//$close();
-//$browser(Certificado::class);
-//$launch(Certificado::class);
 
+//BrowserTest::launch('wo_id_1', \Bót\Cdp\Rfb\eCac\Certificado::class);
+//BrowserTest::clearTmp('wo_id_1');
